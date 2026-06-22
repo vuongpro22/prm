@@ -30,10 +30,10 @@ class PayosService {
   // Create payment link on payOS
   Future<Map<String, dynamic>?> createPaymentLink({
     required int orderCode,
-    required double totalUsd,
+    required double totalVnd,
     required String itemName,
   }) async {
-    final amountVnd = (totalUsd * usdToVndRate).round();
+    final amountVnd = totalVnd.round();
     
     // payOS description has a max length of 25 characters
     final String description = 'Thanh toan Luxura $orderCode'.substring(0, 25);

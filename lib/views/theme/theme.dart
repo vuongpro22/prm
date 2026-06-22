@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AppTheme {
+  static String formatVnd(double amount) {
+    final formatter = NumberFormat('#,###', 'vi_VN');
+    return '${formatter.format(amount)} đ';
+  }
   // Brand colors
   static const Color darkBg = Color(0xFF0F0C20);
   static const Color darkSurface = Color(0xFF1B1736);

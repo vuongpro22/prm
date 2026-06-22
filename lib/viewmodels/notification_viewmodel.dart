@@ -37,12 +37,12 @@ class NotificationViewModel extends ChangeNotifier {
       // Seed initial notification if empty
       if (_notifications.isEmpty) {
         await addNotification(
-          'Welcome to Luxura!',
-          'Thank you for joining Luxura Store. Use promo code WELCOME10 to get 10% off your first purchase!',
+          'Chào mừng bạn đến với Luxura!',
+          'Cảm ơn bạn đã tham gia Luxura Store. Hãy sử dụng mã khuyến mãi WELCOME10 để được giảm giá 10% cho đơn hàng đầu tiên của bạn!',
         );
         await addNotification(
-          'Summer Sale Active!',
-          'Save big today with discount code SUPERDEAL20 for a 20% discount on orders!',
+          'Chương trình Khuyến mãi Hè đang diễn ra!',
+          'Tiết kiệm cực lớn ngay hôm nay với mã giảm giá SUPERDEAL20 để được giảm 20% cho các đơn hàng!',
         );
       }
     } catch (_) {}

@@ -14,12 +14,12 @@ class NotificationsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('N O T I F I C A T I O N S'),
+        title: const Text('T H Ô N G  B Á O'),
         actions: [
           if (notifications.isNotEmpty) ...[
             TextButton(
               onPressed: () => notifVm.markAllAsRead(),
-              child: const Text('READ ALL', style: TextStyle(color: AppTheme.secondaryTeal, fontSize: 12)),
+              child: const Text('ĐỌC TẤT CẢ', style: TextStyle(color: AppTheme.secondaryTeal, fontSize: 12)),
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline, color: AppTheme.accentRose),
@@ -27,19 +27,19 @@ class NotificationsScreen extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Clear Notifications'),
-                    content: const Text('Do you want to clear your notification history?'),
+                    title: const Text('Xóa thông báo'),
+                    content: const Text('Bạn có muốn xóa toàn bộ lịch sử thông báo không?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CANCEL'),
+                        child: const Text('HỦY'),
                       ),
                       TextButton(
                         onPressed: () {
                           notifVm.clearNotifications();
                           Navigator.pop(context);
                         },
-                        child: const Text('CLEAR', style: TextStyle(color: AppTheme.accentRose)),
+                        child: const Text('XÓA', style: TextStyle(color: AppTheme.accentRose)),
                       ),
                     ],
                   ),
@@ -57,12 +57,12 @@ class NotificationsScreen extends StatelessWidget {
                   Icon(Icons.notifications_none, size: 72, color: AppTheme.textMuted),
                   SizedBox(height: 16),
                   Text(
-                    'No notifications yet',
+                    'Chưa có thông báo nào',
                     style: TextStyle(fontSize: 18, color: AppTheme.textMain, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'We will notify you here when transactions occur.',
+                    'Chúng tôi sẽ thông báo cho bạn tại đây khi có giao dịch phát sinh.',
                     style: TextStyle(color: AppTheme.textMuted),
                   ),
                 ],

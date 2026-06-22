@@ -98,7 +98,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${product.price.toStringAsFixed(2)}',
+                    AppTheme.formatVnd(product.price),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -109,7 +109,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Description
                   const Text(
-                    'Overview',
+                    'Tổng quan',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -131,7 +131,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Row(
                     children: [
                       const Text(
-                        'Quantity:',
+                        'Số lượng:',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -182,7 +182,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Customer Reviews
                   const Text(
-                    'Customer Reviews',
+                    'Đánh giá từ khách hàng',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -192,7 +192,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 12),
                   if (product.reviews.isEmpty)
                     const Text(
-                      'No reviews yet for this product.',
+                      'Chưa có đánh giá nào cho sản phẩm này.',
                       style: TextStyle(color: AppTheme.textMuted, fontStyle: FontStyle.italic),
                     )
                   else
@@ -217,10 +217,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   cartVm.addToCart(product, quantity: _quantity);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Added $_quantity x ${product.name} to cart!'),
+                      content: Text('Đã thêm $_quantity x ${product.name} vào giỏ hàng!'),
                       backgroundColor: AppTheme.secondaryTeal,
                       action: SnackBarAction(
-                        label: 'VIEW CART',
+                        label: 'XEM GIỎ HÀNG',
                         textColor: Colors.white,
                         onPressed: () {
                           Navigator.pop(context); // Go back to shop
@@ -230,7 +230,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   );
                 },
-                child: const Text('ADD TO CART'),
+                child: const Text('THÊM VÀO GIỎ HÀNG'),
               ),
             ),
           ],

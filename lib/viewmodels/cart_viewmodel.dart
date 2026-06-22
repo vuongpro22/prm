@@ -49,7 +49,7 @@ class CartViewModel extends ChangeNotifier {
           (p) => p.id == productId,
           orElse: () => Product(
             id: productId,
-            name: 'Unknown Product',
+            name: 'Sản phẩm không xác định',
             description: '',
             price: 0.0,
             imageUrl: '',
@@ -120,20 +120,20 @@ class CartViewModel extends ChangeNotifier {
   // Cost calculations
   double get subtotal => _items.fold(0.0, (sum, item) => sum + item.totalPrice);
   double get discountAmount => subtotal * _discountPercentage;
-  double get shippingFee => (subtotal == 0.0 || subtotal > 500.0) ? 0.0 : 15.0; // Free shipping on orders over $500
-  double get taxAmount => (subtotal - discountAmount) * 0.08; // 8% sales tax
+  double get shippingFee => 0.0; // Phí vận chuyển luôn miễn phí (Free)
+  double get taxAmount => (subtotal - discountAmount) * 0.10; // 10% thuế VAT
   double get total => subtotal == 0.0 ? 0.0 : (subtotal - discountAmount + shippingFee + taxAmount);
 
   bool applyPromoCode(String code) {
     final cleaned = code.trim().toUpperCase();
     if (cleaned == 'WELCOME10') {
       _promoCode = cleaned;
-      _discountPercentage = 0.10; // 10% off
+      _discountPercentage = 0.10; // Giảm 10%
       notifyListeners();
       return true;
     } else if (cleaned == 'SUPERDEAL20') {
       _promoCode = cleaned;
-      _discountPercentage = 0.20; // 20% off
+      _discountPercentage = 0.20; // Giảm 20%
       notifyListeners();
       return true;
     }
@@ -158,7 +158,7 @@ class CartViewModel extends ChangeNotifier {
     final newOrder = OrderModel(
       id: orderId,
       date: DateTime.now(),
-      status: 'Processing',
+      status: 'Đang xử lý',
       total: total,
       shippingAddress: shippingAddress,
       itemNames: _items.map((item) => '${item.product.name} (x${item.quantity})').toList(),

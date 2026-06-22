@@ -37,7 +37,7 @@ class ChatViewModel extends ChangeNotifier {
 
       if (_messages.isEmpty) {
         // Welcome message from bot
-        await _insertBotMessage('Hello! Welcome to Luxura support. How can I assist you today? You can ask about shipping, returns, store hours, warranties, or active promos.');
+        await _insertBotMessage('Xin chào! Chào mừng bạn đến với bộ phận hỗ trợ của Luxura. Tôi có thể giúp gì cho bạn hôm nay? Bạn có thể hỏi về vận chuyển, đổi trả hàng, giờ mở cửa, chính sách bảo hành hoặc các khuyến mãi hiện có.');
       }
     } catch (_) {}
 
@@ -92,26 +92,26 @@ class ChatViewModel extends ChangeNotifier {
   String _generateBotReply(String input) {
     final query = input.toLowerCase();
 
-    if (query.contains('shipping') || query.contains('delivery')) {
-      return 'We offer FREE standard shipping on orders over \$500. For orders under \$500, shipping is \$15. Delivery typically takes 3 to 5 business days.';
+    if (query.contains('vận chuyển') || query.contains('giao hàng') || query.contains('ship') || query.contains('shipping') || query.contains('delivery')) {
+      return 'Chúng tôi miễn phí vận chuyển cho đơn hàng trên 10.000.000 đ. Với đơn hàng dưới 10.000.000 đ, phí vận chuyển là 50.000 đ. Thời gian giao hàng dự kiến từ 3 đến 5 ngày làm việc.';
     }
-    if (query.contains('return') || query.contains('refund') || query.contains('exchange')) {
-      return 'Our returns policy is simple! You can return any unused item in its original packaging within 30 days of purchase for a full refund or exchange. Contact support for a return shipping label.';
+    if (query.contains('trả hàng') || query.contains('hoàn tiền') || query.contains('đổi trả') || query.contains('return') || query.contains('refund') || query.contains('exchange')) {
+      return 'Chính sách đổi trả rất đơn giản! Bạn có thể đổi trả bất kỳ sản phẩm nào chưa qua sử dụng, còn nguyên bao bì trong vòng 30 ngày kể từ khi mua để được hoàn tiền hoặc đổi sản phẩm mới. Liên hệ hỗ trợ để được hướng dẫn thêm.';
     }
-    if (query.contains('hour') || query.contains('open') || query.contains('close') || query.contains('time')) {
-      return 'Our primary showrooms are open from 9:00 AM to 9:00 PM, Monday through Sunday. Check our "Store Locator" tab to find directions to the nearest branch!';
+    if (query.contains('giờ') || query.contains('mở cửa') || query.contains('đóng cửa') || query.contains('làm việc') || query.contains('hour') || query.contains('open') || query.contains('close') || query.contains('time')) {
+      return 'Showroom chính của chúng tôi mở cửa từ 9:00 sáng đến 9:00 tối từ Thứ Hai đến Chủ Nhật. Vui lòng xem tab "Chi nhánh" để xem vị trí các cửa hàng gần nhất!';
     }
-    if (query.contains('warranty') || query.contains('guarantee') || query.contains('repair')) {
-      return 'All premium hardware items purchased at Luxura include a standard 12-month local manufacturer warranty covering hardware defects. Accessories include a 6-month warranty.';
+    if (query.contains('bảo hành') || query.contains('sửa') || query.contains('hỏng') || query.contains('warranty') || query.contains('guarantee') || query.contains('repair')) {
+      return 'Tất cả các sản phẩm điện tử cao cấp tại Luxura đều được bảo hành chính hãng 12 tháng tại các trung tâm bảo hành trong nước. Phụ kiện đi kèm được bảo hành 6 tháng.';
     }
-    if (query.contains('discount') || query.contains('coupon') || query.contains('promo') || query.contains('sale')) {
-      return 'You can get 10% off your first purchase using the promo code: WELCOME10. Or try SUPERDEAL20 for a 20% discount on summer items!';
+    if (query.contains('khuyến mãi') || query.contains('giảm giá') || query.contains('mã') || query.contains('coupon') || query.contains('promo') || query.contains('sale')) {
+      return 'Bạn có thể dùng mã WELCOME10 để được giảm giá 10% cho đơn hàng đầu tiên, hoặc mã SUPERDEAL20 để được giảm giá 20% cho bộ sưu tập hè!';
     }
-    if (query.contains('hello') || query.contains('hi') || query.contains('hey')) {
-      return 'Hello there! Let me know if you need help with shipping, returns, store hours, warranties, or checking active promo codes!';
+    if (query.contains('chào') || query.contains('hello') || query.contains('hi') || query.contains('hey')) {
+      return 'Xin chào! Hãy cho tôi biết nếu bạn cần hỗ trợ về các vấn đề: giao hàng, chính sách đổi trả, giờ mở cửa showroom, chế độ bảo hành hoặc các mã giảm giá nhé!';
     }
 
-    return 'I appreciate your message. I am a virtual assistant, so for specific inquiries or account issues, feel free to contact us at support@luxurastore.com or call 1-800-LUXURA.';
+    return 'Cảm ơn bạn đã nhắn tin. Tôi là trợ lý ảo Luxura. Đối với các yêu cầu cụ thể hoặc vấn đề tài khoản, xin vui lòng gửi email về support@luxurastore.com hoặc hotline 1-800-LUXURA.';
   }
 
   Future<void> clearChat() async {
@@ -119,6 +119,6 @@ class ChatViewModel extends ChangeNotifier {
     _messages = [];
     notifyListeners();
     await _dbHelper.clearMessages(_userId!);
-    await _insertBotMessage('Chat history cleared. How can I help you today?');
+    await _insertBotMessage('Lịch sử trò chuyện đã được xóa. Tôi có thể giúp gì thêm cho bạn?');
   }
 }

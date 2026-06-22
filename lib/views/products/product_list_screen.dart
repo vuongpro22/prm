@@ -73,7 +73,7 @@ class ProductListScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               decoration: const InputDecoration(
-                hintText: 'Search products...',
+                hintText: 'Tìm kiếm sản phẩm...',
                 prefixIcon: Icon(Icons.search, color: AppTheme.textMuted),
               ),
               onChanged: (val) => productVm.setSearchQuery(val),
@@ -90,7 +90,7 @@ class ProductListScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${productVm.products.length} Products Found',
+                  'Tìm thấy ${productVm.products.length} sản phẩm',
                   style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
                 ),
                 DropdownButton<String>(
@@ -100,9 +100,9 @@ class ProductListScreen extends StatelessWidget {
                   icon: const Icon(Icons.swap_vert, color: AppTheme.secondaryTeal, size: 20),
                   style: const TextStyle(color: AppTheme.textMain, fontSize: 13, fontWeight: FontWeight.bold),
                   items: const [
-                    DropdownMenuItem(value: 'Popularity', child: Text('Sort: Popularity')),
-                    DropdownMenuItem(value: 'PriceLowToHigh', child: Text('Sort: Price L-H')),
-                    DropdownMenuItem(value: 'PriceHighToLow', child: Text('Sort: Price H-L')),
+                    DropdownMenuItem(value: 'Popularity', child: Text('Sắp xếp: Phổ biến')),
+                    DropdownMenuItem(value: 'PriceLowToHigh', child: Text('Sắp xếp: Giá thấp đến cao')),
+                    DropdownMenuItem(value: 'PriceHighToLow', child: Text('Sắp xếp: Giá cao đến thấp')),
                   ],
                   onChanged: (val) {
                     if (val != null) productVm.setSortBy(val);
@@ -117,7 +117,7 @@ class ProductListScreen extends StatelessWidget {
             child: productVm.products.isEmpty
                 ? const Center(
                     child: Text(
-                      'No products found matching filters.',
+                      'Không tìm thấy sản phẩm phù hợp.',
                       style: TextStyle(color: AppTheme.textMuted),
                     ),
                   )
@@ -163,12 +163,12 @@ class ProductListScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Summer Collection 2026',
+                'Bộ sưu tập mùa Hè 2026',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               SizedBox(height: 4),
               Text(
-                'Use code: SUPERDEAL20 for 20% off!',
+                'Nhập mã: SUPERDEAL20 để giảm 20%!',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
@@ -289,7 +289,7 @@ class ProductListScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product.price.toStringAsFixed(2)}',
+                        AppTheme.formatVnd(product.price),
                         style: const TextStyle(
                           color: AppTheme.secondaryTeal,
                           fontWeight: FontWeight.bold,
@@ -309,7 +309,7 @@ class ProductListScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).clearSnackBars();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${product.name} added to cart!'),
+                              content: Text('Đã thêm ${product.name} vào giỏ hàng!'),
                               backgroundColor: AppTheme.secondaryTeal,
                               duration: const Duration(seconds: 1),
                             ),

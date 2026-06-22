@@ -26,7 +26,7 @@ class _CartScreenState extends State<CartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Y O U R  C A R T'),
+        title: const Text('G I Ỏ  H À N G'),
         actions: [
           if (cartVm.items.isNotEmpty)
             IconButton(
@@ -35,19 +35,19 @@ class _CartScreenState extends State<CartScreen> {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Clear Cart'),
-                    content: const Text('Are you sure you want to remove all items from your cart?'),
+                    title: const Text('Xóa Giỏ Hàng'),
+                    content: const Text('Bạn có chắc chắn muốn xóa toàn bộ sản phẩm khỏi giỏ hàng không?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CANCEL'),
+                        child: const Text('HỦY'),
                       ),
                       TextButton(
                         onPressed: () {
                           cartVm.clearCart();
                           Navigator.pop(context);
                         },
-                        child: const Text('CLEAR', style: TextStyle(color: AppTheme.accentRose)),
+                        child: const Text('XÓA', style: TextStyle(color: AppTheme.accentRose)),
                       ),
                     ],
                   ),
@@ -64,12 +64,12 @@ class _CartScreenState extends State<CartScreen> {
                   const Icon(Icons.shopping_cart_outlined, size: 72, color: AppTheme.textMuted),
                   const SizedBox(height: 16),
                   const Text(
-                    'Your cart is empty',
+                    'Giỏ hàng của bạn đang trống',
                     style: TextStyle(fontSize: 18, color: AppTheme.textMain, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Go browse the shop to find amazing items!',
+                    'Hãy dạo quanh cửa hàng để chọn mua những sản phẩm tuyệt vời!',
                     style: TextStyle(color: AppTheme.textMuted),
                   ),
                   const SizedBox(height: 24),
@@ -77,7 +77,7 @@ class _CartScreenState extends State<CartScreen> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('BROWSE PRODUCTS'),
+                    child: const Text('MUA SẮM NGAY'),
                   ),
                 ],
               ),
@@ -107,7 +107,7 @@ class _CartScreenState extends State<CartScreen> {
                           cartVm.removeFromCart(item.product);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${item.product.name} removed from cart'),
+                              content: Text('Đã xóa ${item.product.name} khỏi giỏ hàng'),
                               backgroundColor: AppTheme.accentRose,
                             ),
                           );
@@ -157,8 +157,8 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${item.product.price.toStringAsFixed(2)}',
-                    style: const TextStyle(color: AppTheme.secondaryTeal, fontSize: 13),
+                    AppTheme.formatVnd(item.product.price),
+                    style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
                   ),
                 ],
               ),
@@ -214,7 +214,7 @@ class _CartScreenState extends State<CartScreen> {
                   child: TextField(
                     controller: _promoController,
                     decoration: const InputDecoration(
-                      hintText: 'Enter Promo Code (WELCOME10)',
+                      hintText: 'Nhập mã giảm giá (WELCOME10)',
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),
@@ -232,20 +232,20 @@ class _CartScreenState extends State<CartScreen> {
                     if (cartVm.applyPromoCode(_promoController.text)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Promo code applied successfully!'),
+                          content: Text('Áp dụng mã giảm giá thành công!'),
                           backgroundColor: AppTheme.secondaryTeal,
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Invalid promo code'),
+                          content: Text('Mã giảm giá không hợp lệ'),
                           backgroundColor: AppTheme.accentRose,
                         ),
                       );
                     }
                   },
-                  child: const Text('APPLY', style: TextStyle(fontSize: 12)),
+                  child: const Text('ÁP DỤNG', style: TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -258,7 +258,7 @@ class _CartScreenState extends State<CartScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Chip(
-                  label: Text('Code: ${cartVm.promoCode}'),
+                  label: Text('Mã: ${cartVm.promoCode}'),
                   backgroundColor: AppTheme.primaryNeon.withOpacity(0.2),
                   labelStyle: const TextStyle(color: AppTheme.primaryNeon, fontSize: 12),
                   onDeleted: () {
@@ -267,7 +267,7 @@ class _CartScreenState extends State<CartScreen> {
                   },
                 ),
                 Text(
-                  '- \$${cartVm.discountAmount.toStringAsFixed(2)}',
+                  '- ${AppTheme.formatVnd(cartVm.discountAmount)}',
                   style: const TextStyle(color: AppTheme.accentRose, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -278,17 +278,17 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Subtotal', style: TextStyle(color: AppTheme.textMuted)),
-              Text('\$${cartVm.subtotal.toStringAsFixed(2)}', style: const TextStyle(color: AppTheme.textMain)),
+              const Text('Tạm tính', style: TextStyle(color: AppTheme.textMuted)),
+              Text(AppTheme.formatVnd(cartVm.subtotal), style: const TextStyle(color: AppTheme.textMain)),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Shipping Fee', style: TextStyle(color: AppTheme.textMuted)),
+              const Text('Phí vận chuyển', style: TextStyle(color: AppTheme.textMuted)),
               Text(
-                cartVm.shippingFee == 0.0 ? 'FREE' : '\$${cartVm.shippingFee.toStringAsFixed(2)}',
+                cartVm.shippingFee == 0.0 ? 'Miễn phí' : AppTheme.formatVnd(cartVm.shippingFee),
                 style: TextStyle(color: cartVm.shippingFee == 0.0 ? AppTheme.secondaryTeal : AppTheme.textMain),
               ),
             ],
@@ -297,17 +297,17 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Estimated Tax (8%)', style: TextStyle(color: AppTheme.textMuted)),
-              Text('\$${cartVm.taxAmount.toStringAsFixed(2)}', style: const TextStyle(color: AppTheme.textMain)),
+              const Text('Thuế VAT (10%)', style: TextStyle(color: AppTheme.textMuted)),
+              Text(AppTheme.formatVnd(cartVm.taxAmount), style: const TextStyle(color: AppTheme.textMain)),
             ],
           ),
           const Divider(color: Colors.white10, height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Order Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+              const Text('Tổng đơn hàng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
               Text(
-                '\$${cartVm.total.toStringAsFixed(2)}',
+                AppTheme.formatVnd(cartVm.total),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.secondaryTeal),
               ),
             ],
@@ -322,7 +322,7 @@ class _CartScreenState extends State<CartScreen> {
                 MaterialPageRoute(builder: (_) => const CheckoutScreen()),
               );
             },
-            child: const Text('PROCEED TO CHECKOUT'),
+            child: const Text('TIẾN HÀNH THANH TOÁN'),
           ),
         ],
       ),

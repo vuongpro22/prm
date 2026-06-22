@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authVm.errorMessage ?? 'Authentication failed'),
+            content: Text(authVm.errorMessage ?? 'Đăng nhập thất bại'),
             backgroundColor: AppTheme.accentRose,
           ),
         );
@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Curated Premium Lifestyle Store',
+                    'Cửa hàng phong cách sống cao cấp',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppTheme.textMuted, fontSize: 14),
                   ),
@@ -86,17 +86,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Email Address',
+                      labelText: 'Địa chỉ Email',
                       prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textMuted),
-                      hintText: 'name@example.com',
+                      hintText: 'ten@example.com',
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Email is required';
+                        return 'Vui lòng nhập email';
                       }
                       final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
                       if (!regex.hasMatch(value.trim())) {
-                        return 'Please enter a valid email';
+                        return 'Vui lòng nhập địa chỉ email hợp lệ';
                       }
                       return null;
                     },
@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Mật khẩu',
                       prefixIcon: const Icon(Icons.lock_outlined, color: AppTheme.textMuted),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -125,10 +125,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Password is required';
+                        return 'Vui lòng nhập mật khẩu';
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return 'Mật khẩu phải dài từ 6 ký tự trở lên';
                       }
                       return null;
                     },
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       : ElevatedButton(
                           key: const Key('loginButton'),
                           onPressed: _submit,
-                          child: const Text('Log In'),
+                          child: const Text('Đăng nhập'),
                         ),
                   const SizedBox(height: 24),
 
@@ -154,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Don't have an account? ",
+                        "Chưa có tài khoản? ",
                         style: TextStyle(color: AppTheme.textMuted),
                       ),
                       TextButton(
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         child: const Text(
-                          'Register Now',
+                          'Đăng ký ngay',
                           style: TextStyle(
                             color: AppTheme.secondaryTeal,
                             fontWeight: FontWeight.bold,

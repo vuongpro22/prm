@@ -63,11 +63,11 @@ class AuthViewModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = 'Invalid email or password';
+        _errorMessage = 'Email hoặc mật khẩu không đúng';
       }
     } catch (e) {
       debugPrint('Login exception: $e');
-      _errorMessage = 'An error occurred. Please try again.';
+      _errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
     }
 
     _isLoading = false;
@@ -88,11 +88,11 @@ class AuthViewModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = 'Email address already exists';
+        _errorMessage = 'Địa chỉ email đã tồn tại';
       }
     } catch (e) {
       debugPrint('Registration exception: $e');
-      _errorMessage = 'Registration failed. Please try again.';
+      _errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
     }
 
     _isLoading = false;

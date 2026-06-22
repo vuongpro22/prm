@@ -19,18 +19,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final PayosService _payosService = PayosService();
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
-  final _holderController = TextEditingController();
-  final _cardController = TextEditingController();
-  final _expiryController = TextEditingController();
-  final _cvvController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   @override
   void dispose() {
     _addressController.dispose();
-    _holderController.dispose();
-    _cardController.dispose();
-    _expiryController.dispose();
-    _cvvController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -54,8 +50,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // 2. Call payOS to create payment link
       final paymentData = await _payosService.createPaymentLink(
         orderCode: orderCode,
-        totalUsd: cartVm.total,
-        itemName: 'Luxura Store Goods',
+        totalVnd: cartVm.total,
+        itemName: 'Đơn hàng Luxura',
       );
 
       if (mounted) {
@@ -66,7 +62,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Failed to connect to payOS Payment Gateway. Please try again.'),
+              content: Text('Không thể kết nối tới cổng thanh toán payOS. Vui lòng thử lại.'),
               backgroundColor: AppTheme.accentRose,
             ),
           );
@@ -76,24 +72,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       final checkoutUrl = paymentData['checkoutUrl'] as String;
       final amountVnd = paymentData['amount'] as int;
+      final qrCodeText = paymentData['qrCode'] as String? ?? '';
+      final accountNumber = paymentData['accountNumber'] as String? ?? '';
+      final accountName = paymentData['accountName'] as String? ?? '';
+      final bin = paymentData['bin'] as String? ?? '';
+      final description = paymentData['description'] as String? ?? '';
 
-      // 3. Launch the checkout URL in external browser
-      final uri = Uri.parse(checkoutUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open the payment page. Please copy the checkout URL.'),
-              backgroundColor: AppTheme.accentRose,
-            ),
-          );
-        }
-        return;
+      // Tên ngân hàng dựa trên mã BIN của Việt Nam
+      String getBankName(String binCode) {
+        final binMap = {
+          '970415': 'VietinBank',
+          '970436': 'Vietcombank',
+          '970418': 'BIDV',
+          '970405': 'Agribank',
+          '970422': 'MBBank',
+          '970407': 'Techcombank',
+          '970416': 'ACB',
+          '970432': 'VPBank',
+          '970423': 'TPBank',
+          '970403': 'Sacombank',
+          '970437': 'HDBank',
+          '970441': 'VIB',
+          '970443': 'SHB',
+          '970448': 'OCB',
+          '970449': 'LPBank',
+        };
+        return binMap[binCode] ?? 'Ngân hàng thụ hưởng (BIN: $binCode)';
       }
 
-      // 4. Show the payment status polling dialog
+      final bankName = getBankName(bin);
+
+      // 3. Show the payment status polling dialog (In-App QR Dialog)
       Timer? pollingTimer;
 
       if (mounted) {
@@ -106,83 +115,318 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               final status = await _payosService.getPaymentStatus(orderCode);
               if (status == 'PAID') {
                 timer.cancel();
-                Navigator.pop(dialogContext); // Close this polling dialog
-                _completeOrder(cartVm, notifVm, orderCode);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext); // Close this polling dialog
+                }
+                if (mounted) {
+                  _completeOrder(cartVm, notifVm, orderCode);
+                }
               }
             });
 
-            final formattedVnd = amountVnd.toString().replaceAllMapped(
-              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-              (Match m) => '${m[1]},'
-            );
-
-            return AlertDialog(
-              backgroundColor: AppTheme.darkSurface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Row(
-                children: [
-                  Icon(Icons.qr_code_scanner, color: AppTheme.secondaryTeal),
-                  SizedBox(width: 8),
-                  Text('payOS QR Checkout', style: TextStyle(fontSize: 16)),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 12),
-                  const CircularProgressIndicator(color: AppTheme.secondaryTeal),
-                  const SizedBox(height: 24),
-                  Text(
-                    '$formattedVnd VND',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.secondaryTeal),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Please complete the transaction in your opened browser window. We are checking the payment status automatically...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12, height: 1.4),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.secondaryTeal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    ),
-                    onPressed: () async {
-                      // Manual status check click
-                      final status = await _payosService.getPaymentStatus(orderCode);
-                      if (status == 'PAID') {
-                        pollingTimer?.cancel();
-                        Navigator.pop(dialogContext);
-                        _completeOrder(cartVm, notifVm, orderCode);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Payment is still pending...'),
-                            duration: Duration(seconds: 1),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text('CHECK PAYMENT STATUS', style: TextStyle(fontSize: 11)),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    pollingTimer?.cancel();
-                    Navigator.pop(dialogContext); // Close dialog
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Payment cancelled by user.'),
-                        backgroundColor: AppTheme.accentRose,
-                      ),
-                    );
-                  },
-                  child: const Text('CANCEL', style: TextStyle(color: AppTheme.accentRose)),
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.darkBg,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.primaryNeon.withOpacity(0.5), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryNeon.withOpacity(0.15),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    )
+                  ],
                 ),
-              ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Header
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppTheme.primaryNeon, AppTheme.primaryNeon.withOpacity(0.6)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.qr_code_scanner, color: Colors.white, size: 28),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Thanh toán Đơn hàng',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'Quét mã QR qua ứng dụng Ngân hàng',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              // QR Image Container (White background is mandatory for QR readers)
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      spreadRadius: 2,
+                                    )
+                                  ],
+                                ),
+                                child: qrCodeText.isNotEmpty
+                                    ? Image.network(
+                                        'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${Uri.encodeComponent(qrCodeText)}',
+                                        width: 180,
+                                        height: 180,
+                                        fit: BoxFit.contain,
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return const SizedBox(
+                                            width: 180,
+                                            height: 180,
+                                            child: Center(
+                                              child: CircularProgressIndicator(color: AppTheme.primaryNeon),
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const SizedBox(
+                                            width: 180,
+                                            height: 180,
+                                            child: Center(
+                                              child: Icon(Icons.broken_image_outlined, color: AppTheme.accentRose, size: 48),
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : const SizedBox(
+                                        width: 180,
+                                        height: 180,
+                                        child: Center(
+                                          child: Text('Không tìm thấy mã QR', style: TextStyle(color: Colors.black)),
+                                        ),
+                                      ),
+                              ),
+                              const SizedBox(height: 18),
+
+                              // Amount display
+                              Text(
+                                AppTheme.formatVnd(amountVnd.toDouble()),
+                                style: const TextStyle(
+                                  color: AppTheme.secondaryTeal,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Detail Card with copy buttons
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.darkSurface,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _buildTransferDetailRow(
+                                      label: 'Ngân hàng',
+                                      value: bankName,
+                                      showCopy: false,
+                                    ),
+                                    const Divider(color: Colors.white10, height: 16),
+                                    _buildTransferDetailRow(
+                                      label: 'Số tài khoản',
+                                      value: accountNumber,
+                                      showCopy: true,
+                                    ),
+                                    const Divider(color: Colors.white10, height: 16),
+                                    _buildTransferDetailRow(
+                                      label: 'Chủ tài khoản',
+                                      value: accountName,
+                                      showCopy: false,
+                                    ),
+                                    const Divider(color: Colors.white10, height: 16),
+                                    _buildTransferDetailRow(
+                                      label: 'Nội dung CK',
+                                      value: description,
+                                      showCopy: true,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Status Loader
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      color: AppTheme.secondaryTeal,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Đang tự động kiểm tra trạng thái thanh toán...',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 11,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Actions row
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        side: const BorderSide(color: AppTheme.accentRose),
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        pollingTimer?.cancel();
+                                        Navigator.pop(dialogContext);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Đã hủy giao dịch thanh toán.'),
+                                            backgroundColor: AppTheme.accentRose,
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        'HỦY GIAO DỊCH',
+                                        style: TextStyle(
+                                          color: AppTheme.accentRose,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppTheme.secondaryTeal,
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        final status = await _payosService.getPaymentStatus(orderCode);
+                                        if (!dialogContext.mounted) return;
+                                        if (status == 'PAID') {
+                                          pollingTimer?.cancel();
+                                          Navigator.pop(dialogContext);
+                                          if (mounted) {
+                                            _completeOrder(cartVm, notifVm, orderCode);
+                                          }
+                                        } else {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Thanh toán đang chờ xử lý...'),
+                                                duration: Duration(seconds: 1),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                      child: const Text(
+                                        'KIỂM TRA LẠI',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Alternative link
+                              TextButton(
+                                onPressed: () async {
+                                  final uri = Uri.parse(checkoutUrl);
+                                  if (await canLaunchUrl(uri)) {
+                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  } else {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Không thể mở liên kết trình duyệt.'),
+                                          backgroundColor: AppTheme.accentRose,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                child: Text(
+                                  'Mở trang thanh toán trên trình duyệt web',
+                                  style: TextStyle(
+                                    color: AppTheme.primaryNeon.withOpacity(0.9),
+                                    fontSize: 11,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             );
           },
         ).then((_) {
@@ -195,14 +439,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _completeOrder(CartViewModel cartVm, NotificationViewModel notifVm, int orderCode) async {
     final order = await cartVm.checkout(
       shippingAddress: _addressController.text.trim(),
-      cardHolder: _holderController.text.trim(),
-      cardNumber: 'payOS-$orderCode',
+      cardHolder: _nameController.text.trim(),
+      cardNumber: 'SĐT: ${_phoneController.text.trim()} (payOS-$orderCode)',
     );
 
     if (order != null) {
       await notifVm.addNotification(
-        'Order Placed via payOS!',
-        'Your payment for order ${order.id} was confirmed via payOS. Total: \$${order.total.toStringAsFixed(2)}',
+        'Đơn hàng đã đặt qua payOS!',
+        'Đơn hàng ${order.id} đã được xác nhận thanh toán thành công qua payOS. Tổng tiền: ${AppTheme.formatVnd(order.total)}',
       );
 
       if (mounted) {
@@ -223,7 +467,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Order Confirmed!',
+                  'Đơn hàng đã xác nhận!',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -232,17 +476,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Order ID: ${order.id}\npayOS Ref: $orderCode',
+                  'Mã đơn hàng: ${order.id}\nMã giao dịch payOS: $orderCode',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppTheme.textMuted, fontSize: 13, height: 1.4),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // close dialog
-                    Navigator.pop(context); // close checkout
+                    // Quay thẳng về màn hình gốc (Dashboard chính chứa tab Cửa hàng)
+                    Navigator.popUntil(context, (route) => route.isFirst);
                   },
-                  child: const Text('BACK TO SHOP'),
+                  child: const Text('QUAY LẠI CỬA HÀNG'),
                 ),
               ],
             ),
@@ -252,13 +496,67 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  Widget _buildTransferDetailRow({
+    required String label,
+    required String value,
+    required bool showCopy,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppTheme.textMain,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+            softWrap: true,
+          ),
+        ),
+        if (showCopy) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Đã sao chép $label!'),
+                  duration: const Duration(seconds: 1),
+                  backgroundColor: AppTheme.secondaryTeal,
+                ),
+              );
+            },
+            child: const Icon(
+              Icons.copy,
+              size: 16,
+              color: AppTheme.secondaryTeal,
+            ),
+          ),
+        ]
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cartVm = Provider.of<CartViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('C H E C K O U T'),
+        title: const Text('T H A N H  T O Á N'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -269,7 +567,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             children: [
               // Order Summary section
               const Text(
-                'Shipping Address',
+                'Địa chỉ giao hàng',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
               ),
               const SizedBox(height: 12),
@@ -277,12 +575,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 controller: _addressController,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                  hintText: '123 Main Street, Hoan Kiem District, Hanoi',
+                  hintText: 'Số 150 Đường Bạch Đằng, Quận Hải Châu, Đà Nẵng',
                   prefixIcon: Icon(Icons.location_on_outlined, color: AppTheme.textMuted),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a shipping address';
+                    return 'Vui lòng nhập địa chỉ giao hàng';
                   }
                   return null;
                 },
@@ -290,108 +588,50 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const SizedBox(height: 24),
 
               const Text(
-                'Payment Details',
+                'Thông tin nhận hàng',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
               ),
               const SizedBox(height: 12),
 
-              // Card Holder Name
+              // Recipient Name
               TextFormField(
-                controller: _holderController,
-                textCapitalization: TextCapitalization.characters,
+                controller: _nameController,
                 decoration: const InputDecoration(
-                  hintText: 'CARDHOLDER NAME',
+                  hintText: 'Họ và tên người nhận',
                   prefixIcon: Icon(Icons.person_outline, color: AppTheme.textMuted),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Cardholder name is required';
+                    return 'Vui lòng nhập họ và tên người nhận';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 12),
 
-              // Card Number
+              // Recipient Phone
               TextFormField(
-                controller: _cardController,
-                keyboardType: TextInputType.number,
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(16),
-                  CardNumberFormatter(),
+                  LengthLimitingTextInputFormatter(11),
                 ],
                 decoration: const InputDecoration(
-                  hintText: '0000 0000 0000 0000',
-                  prefixIcon: Icon(Icons.credit_card_outlined, color: AppTheme.textMuted),
+                  hintText: 'Số điện thoại nhận hàng',
+                  prefixIcon: Icon(Icons.phone_outlined, color: AppTheme.textMuted),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Credit card number is required';
+                    return 'Vui lòng nhập số điện thoại nhận hàng';
                   }
-                  if (value.replaceAll(' ', '').length != 16) {
-                    return 'Please enter a valid 16-digit card number';
+                  if (value.trim().length < 9) {
+                    return 'Số điện thoại không hợp lệ';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
-
-              // Expiry Date & CVV Row
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _expiryController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(4),
-                        CardExpiryFormatter(),
-                      ],
-                      decoration: const InputDecoration(
-                        hintText: 'MM/YY',
-                        prefixIcon: Icon(Icons.date_range, color: AppTheme.textMuted),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        if (value.length != 5) {
-                          return 'Invalid';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _cvvController,
-                      obscureText: true,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(3),
-                      ],
-                      decoration: const InputDecoration(
-                        hintText: 'CVV',
-                        prefixIcon: Icon(Icons.security, color: AppTheme.textMuted),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        if (value.length != 3) {
-                          return 'Invalid';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 24),
 
               // Order Total preview
               Container(
@@ -404,9 +644,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total Amount:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Tổng thanh toán:', style: TextStyle(fontWeight: FontWeight.bold)),
                     Text(
-                      '\$${cartVm.total.toStringAsFixed(2)}',
+                      AppTheme.formatVnd(cartVm.total),
                       style: const TextStyle(
                         color: AppTheme.secondaryTeal,
                         fontWeight: FontWeight.bold,
@@ -420,7 +660,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
               ElevatedButton(
                 onPressed: _submitCheckout,
-                child: const Text('PLACE ORDER'),
+                child: const Text('ĐẶT HÀNG'),
               ),
             ],
           ),

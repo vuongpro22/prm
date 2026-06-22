@@ -61,17 +61,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag_outlined),
               activeIcon: Icon(Icons.shopping_bag, color: AppTheme.primaryNeon),
-              label: 'Shop',
+              label: 'Cửa hàng',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.map_outlined),
               activeIcon: Icon(Icons.map, color: AppTheme.primaryNeon),
-              label: 'Stores',
+              label: 'Chi nhánh',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_outline),
               activeIcon: Icon(Icons.chat_bubble, color: AppTheme.primaryNeon),
-              label: 'Support',
+              label: 'Hỗ trợ',
             ),
             BottomNavigationBarItem(
               icon: Badge(
@@ -84,12 +84,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 isLabelVisible: unreadCount > 0,
                 child: const Icon(Icons.notifications, color: AppTheme.primaryNeon),
               ),
-              label: 'Alerts',
+              label: 'Thông báo',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings, color: AppTheme.primaryNeon),
-              label: 'Settings',
+              label: 'Cài đặt',
             ),
           ],
         ),
@@ -109,7 +109,7 @@ class ProfileSettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('S E T T I N G S'),
+        title: const Text('C À I  Đ Ặ T'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24.0),
@@ -127,7 +127,7 @@ class ProfileSettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    user?.name ?? 'Guest User',
+                    user?.name ?? 'Khách',
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
@@ -142,21 +142,21 @@ class ProfileSettingsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           const Text(
-            'Account Management',
+            'Quản lý tài khoản',
             style: TextStyle(color: AppTheme.secondaryTeal, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.person_outline, color: AppTheme.textMain),
-            title: const Text('Edit Profile'),
-            subtitle: const Text('Update names, emails, and photos'),
+            title: const Text('Chỉnh sửa hồ sơ'),
+            subtitle: const Text('Cập nhật tên, email và ảnh đại diện'),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textMuted),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.security_outlined, color: AppTheme.textMain),
-            title: const Text('Security'),
-            subtitle: const Text('Passwords, recovery, and biometrics'),
+            title: const Text('Bảo mật'),
+            subtitle: const Text('Mật khẩu, khôi phục và sinh trắc học'),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textMuted),
             onTap: () {},
           ),
@@ -164,13 +164,13 @@ class ProfileSettingsScreen extends StatelessWidget {
           const SizedBox(height: 12),
 
           const Text(
-            'Preferences',
+            'Tùy chọn',
             style: TextStyle(color: AppTheme.secondaryTeal, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined, color: AppTheme.textMain),
-            title: const Text('Dark Theme'),
+            title: const Text('Chế độ tối'),
             trailing: Switch(
               value: true,
               activeColor: AppTheme.primaryNeon,
@@ -179,8 +179,8 @@ class ProfileSettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.language_outlined, color: AppTheme.textMain),
-            title: const Text('Language'),
-            subtitle: const Text('English (US)'),
+            title: const Text('Ngôn ngữ'),
+            subtitle: const Text('Tiếng Việt'),
             trailing: const Icon(Icons.chevron_right, color: AppTheme.textMuted),
             onTap: () {},
           ),
@@ -193,7 +193,7 @@ class ProfileSettingsScreen extends StatelessWidget {
               authVm.logout();
             },
             icon: const Icon(Icons.logout),
-            label: const Text('Log Out'),
+            label: const Text('Đăng xuất'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accentRose.withOpacity(0.9),
             ),

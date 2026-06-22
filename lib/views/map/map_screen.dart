@@ -26,7 +26,7 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('S T O R E  L O C A T O R'),
+        title: const Text('C Ủ A  H À N G'),
       ),
       body: Stack(
         children: [
