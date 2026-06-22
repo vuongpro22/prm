@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +8,31 @@ import 'package:prm_project/views/auth/login_screen.dart';
 
 void main() {
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({});
+
+    // Mock Firebase Core Channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/firebase_core'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'initializeApp') {
+          return {
+            'name': methodCall.arguments['name'] ?? '[DEFAULT]',
+            'options': methodCall.arguments['options'] ?? {},
+            'pluginConstants': {},
+          };
+        }
+        return null;
+      },
+    );
+
+    // Mock Firebase Auth Channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/firebase_auth'),
+      (MethodCall methodCall) async {
+        return null;
+      },
+    );
   });
 
   Widget createLoginScreenWidget() {
@@ -45,8 +70,8 @@ void main() {
       await tester.pump();
 
       // Verify that validation warning messages are shown
-      expect(find.text('Email is required'), findsOneWidget);
-      expect(find.text('Password is required'), findsOneWidget);
+      expect(find.text('Vui lòng nhập email'), findsOneWidget);
+      expect(find.text('Vui lòng nhập mật khẩu'), findsOneWidget);
     });
 
     testWidgets('Triggers invalid email error message on malformed email input', (WidgetTester tester) async {
@@ -67,8 +92,8 @@ void main() {
       await tester.pump();
 
       // Verify validation warning
-      expect(find.text('Please enter a valid email'), findsOneWidget);
-      expect(find.text('Email is required'), findsNothing);
+      expect(find.text('Vui lòng nhập địa chỉ email hợp lệ'), findsOneWidget);
+      expect(find.text('Vui lòng nhập email'), findsNothing);
     });
   });
 }

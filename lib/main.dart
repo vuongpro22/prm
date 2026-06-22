@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:prm_project/firebase_options.dart';
 import 'package:prm_project/viewmodels/auth_viewmodel.dart';
 import 'package:prm_project/viewmodels/product_viewmodel.dart';
 import 'package:prm_project/viewmodels/cart_viewmodel.dart';
@@ -10,8 +12,15 @@ import 'package:prm_project/views/auth/login_screen.dart';
 import 'package:prm_project/views/dashboard/dashboard_screen.dart';
 import 'package:prm_project/views/theme/theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
   runApp(const MyApp());
 }
 

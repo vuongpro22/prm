@@ -174,6 +174,31 @@ class DatabaseHelper {
     }
   }
 
+  Future<User?> getUserByEmail(String email) async {
+    final db = await database;
+    if (db is Database) {
+      final maps = await db.query(
+        'users',
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+      if (maps.isNotEmpty) {
+        return User.fromMap(maps.first);
+      }
+      return null;
+    } else {
+      final list = _fallbackDb['users']!;
+      final match = list.firstWhere(
+        (u) => u['email'] == email,
+        orElse: () => {},
+      );
+      if (match.isNotEmpty) {
+        return User.fromMap(match);
+      }
+      return null;
+    }
+  }
+
   // --- CART API ---
   Future<List<Map<String, dynamic>>> getCartItems(int userId) async {
     final db = await database;
