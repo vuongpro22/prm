@@ -132,9 +132,15 @@ class AuthViewModel extends ChangeNotifier {
       if (credential.user != null) {
         await credential.user!.updateDisplayName(name);
         
-        // Sync to SQLite database
-        final newUser = User(name: name, email: email, password: '');
-        final id = await _dbHelper.insertUser(newUser);
+        // Sync to SQLite database (check if user already exists locally first)
+        var localUser = await _dbHelper.getUserByEmail(email);
+        int id;
+        if (localUser == null) {
+          final newUser = User(name: name, email: email, password: '');
+          id = await _dbHelper.insertUser(newUser);
+        } else {
+          id = localUser.id ?? 1;
+        }
         
         _currentUser = User(id: id, name: name, email: email, password: '');
         
